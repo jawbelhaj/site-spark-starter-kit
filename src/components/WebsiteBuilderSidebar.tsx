@@ -7,8 +7,11 @@ import { ProjectManager } from './ProjectManager';
 import { ContentEditor } from './ContentEditor';
 import { ComponentLibrary } from './ComponentLibrary';
 import { ColorPaletteGenerator } from './ColorPaletteGenerator';
+import { AIContentSuggestions } from './AIContentSuggestions';
+import { LiveSEOAnalyzer } from './LiveSEOAnalyzer';
+import { SocialMediaIntegration } from './SocialMediaIntegration';
 import { WebsiteConfig } from './WebsiteBuilder';
-import { Layout, Palette, FileText, Layers, Settings, Download } from 'lucide-react';
+import { Layout, Palette, FileText, Layers, Settings, Download, Sparkles, Search, Share } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface WebsiteBuilderSidebarProps {
@@ -21,6 +24,7 @@ interface WebsiteBuilderSidebarProps {
   onSaveProject: () => void;
   lastSaved: Date | null;
   historyControls: React.ReactNode;
+  collaborationStatus?: React.ReactNode;
 }
 
 export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
@@ -32,8 +36,29 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
   onLoadProject,
   onSaveProject,
   lastSaved,
-  historyControls
+  historyControls,
+  collaborationStatus
 }) => {
+  const handleAISuggestion = (suggestion: any) => {
+    switch (suggestion.type) {
+      case 'title':
+        onConfigChange({ title: suggestion.text });
+        break;
+      case 'description':
+        onConfigChange({ description: suggestion.text });
+        break;
+      case 'content':
+        // Handle content suggestions
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleSocialUpdate = (socials: Record<string, string>) => {
+    onConfigChange({ socials });
+  };
+
   return (
     <div className="w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-r border-slate-200 dark:border-slate-700 flex flex-col shadow-xl">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700">
@@ -51,7 +76,7 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <ProjectManager 
             currentConfig={config}
             onLoadProject={onLoadProject}
@@ -61,15 +86,21 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
           {historyControls}
         </div>
 
+        {collaborationStatus && (
+          <div className="mb-3">
+            {collaborationStatus}
+          </div>
+        )}
+
         {lastSaved && (
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-slate-500">
             Last saved: {lastSaved.toLocaleTimeString()}
           </p>
         )}
       </div>
 
       <Tabs value={activeTab} onValueChange={onActiveTabChange} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-6 m-4 bg-slate-100 dark:bg-slate-700">
+        <TabsList className="grid w-full grid-cols-8 m-4 bg-slate-100 dark:bg-slate-700">
           <TabsTrigger value="templates" className="flex flex-col items-center gap-1 p-2">
             <Layout className="w-3 h-3" />
             <span className="text-xs">Templates</span>
@@ -82,13 +113,21 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
             <FileText className="w-3 h-3" />
             <span className="text-xs">Content</span>
           </TabsTrigger>
+          <TabsTrigger value="ai" className="flex flex-col items-center gap-1 p-2">
+            <Sparkles className="w-3 h-3" />
+            <span className="text-xs">AI</span>
+          </TabsTrigger>
           <TabsTrigger value="components" className="flex flex-col items-center gap-1 p-2">
             <Layers className="w-3 h-3" />
             <span className="text-xs">Components</span>
           </TabsTrigger>
-          <TabsTrigger value="advanced" className="flex flex-col items-center gap-1 p-2">
-            <Settings className="w-3 h-3" />
-            <span className="text-xs">Advanced</span>
+          <TabsTrigger value="seo" className="flex flex-col items-center gap-1 p-2">
+            <Search className="w-3 h-3" />
+            <span className="text-xs">SEO</span>
+          </TabsTrigger>
+          <TabsTrigger value="social" className="flex flex-col items-center gap-1 p-2">
+            <Share className="w-3 h-3" />
+            <span className="text-xs">Social</span>
           </TabsTrigger>
           <TabsTrigger value="export" className="flex flex-col items-center gap-1 p-2">
             <Download className="w-3 h-3" />
@@ -127,43 +166,28 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
             />
           </TabsContent>
 
+          <TabsContent value="ai" className="h-full mt-0">
+            <div className="p-4 space-y-4 h-full overflow-y-auto">
+              <AIContentSuggestions
+                currentContent={config.content}
+                onApplySuggestion={handleAISuggestion}
+              />
+            </div>
+          </TabsContent>
+
           <TabsContent value="components" className="h-full mt-0">
             <ComponentLibrary />
           </TabsContent>
 
-          <TabsContent value="advanced" className="h-full mt-0">
+          <TabsContent value="seo" className="h-full mt-0">
             <div className="p-4 space-y-4 h-full overflow-y-auto">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  Advanced Settings
-                </h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Custom CSS</label>
-                  <textarea
-                    placeholder="/* Add your custom CSS here */"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-32 resize-none font-mono text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">Meta Tags</label>
-                  <textarea
-                    placeholder="Additional meta tags for SEO"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-20 resize-none"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">Analytics Code</label>
-                  <textarea
-                    placeholder="Google Analytics or other tracking code"
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-20 resize-none"
-                  />
-                </div>
-              </div>
+              <LiveSEOAnalyzer config={config} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="social" className="h-full mt-0">
+            <div className="p-4 space-y-4 h-full overflow-y-auto">
+              <SocialMediaIntegration onUpdateSocials={handleSocialUpdate} />
             </div>
           </TabsContent>
 

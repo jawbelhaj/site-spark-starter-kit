@@ -4,6 +4,8 @@ import { ResponsivePreview } from './ResponsivePreview';
 import { WebsiteBuilderSidebar } from './WebsiteBuilderSidebar';
 import { WebsiteBuilderHeader } from './WebsiteBuilderHeader';
 import { HistoryControls } from './HistoryControls';
+import { KeyboardShortcuts } from './KeyboardShortcuts';
+import { CollaborationStatus } from './CollaborationStatus';
 import { useHistoryState } from '../hooks/useHistoryState';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,6 +33,11 @@ export interface WebsiteConfig {
       phone: string;
       address: string;
     };
+  };
+  socials?: Record<string, string>;
+  analytics?: {
+    googleAnalytics?: string;
+    facebookPixel?: string;
   };
 }
 
@@ -70,7 +77,9 @@ const defaultConfig: WebsiteConfig = {
       phone: '+1 (555) 123-4567',
       address: '123 Main St, City, State 12345'
     }
-  }
+  },
+  socials: {},
+  analytics: {}
 };
 
 export const WebsiteBuilder = () => {
@@ -85,6 +94,7 @@ export const WebsiteBuilder = () => {
   
   const [activeTab, setActiveTab] = useState('templates');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
   const { toast } = useToast();
 
   // Auto-save functionality
@@ -100,6 +110,20 @@ export const WebsiteBuilder = () => {
 
     return () => clearInterval(autoSaveInterval);
   }, [config]);
+
+  // Online/offline detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const updateConfig = (updates: Partial<WebsiteConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
@@ -125,6 +149,20 @@ export const WebsiteBuilder = () => {
     toast({
       title: "Project Saved!",
       description: "Your changes have been saved.",
+    });
+  };
+
+  const exportProject = () => {
+    toast({
+      title: "Export Started!",
+      description: "Your website is being prepared for download.",
+    });
+  };
+
+  const previewProject = () => {
+    toast({
+      title: "Preview Mode",
+      description: "Viewing your website in preview mode.",
     });
   };
 
@@ -161,12 +199,24 @@ export const WebsiteBuilder = () => {
           onSaveProject={saveProject}
           lastSaved={lastSaved}
           historyControls={
-            <HistoryControls
-              canUndo={canUndo}
-              canRedo={canRedo}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-            />
+            <div className="flex items-center gap-2">
+              <HistoryControls
+                canUndo={canUndo}
+                canRedo={canRedo}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+              />
+              <KeyboardShortcuts
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                onSave={saveProject}
+                onExport={exportProject}
+                onPreview={previewProject}
+              />
+            </div>
+          }
+          collaborationStatus={
+            <CollaborationStatus isOnline={isOnline} />
           }
         />
 
