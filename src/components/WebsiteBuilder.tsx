@@ -1,14 +1,17 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TemplateSelector } from './TemplateSelector';
 import { CustomizationPanel } from './CustomizationPanel';
-import { LivePreview } from './LivePreview';
+import { ResponsivePreview } from './ResponsivePreview';
 import { ExportPanel } from './ExportPanel';
 import { ProjectManager } from './ProjectManager';
 import { ContentEditor } from './ContentEditor';
-import { Code, Layout, Settings, Download, FileText, Palette } from 'lucide-react';
+import { ComponentLibrary } from './ComponentLibrary';
+import { ColorPaletteGenerator } from './ColorPaletteGenerator';
+import { useHistoryState } from '../hooks/useHistoryState';
+import { Code, Layout, Settings, Download, FileText, Palette, Undo, Redo, Layers, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 export interface WebsiteConfig {
   template: 'blog' | 'portfolio' | 'store' | 'landing';
@@ -77,8 +80,32 @@ const defaultConfig: WebsiteConfig = {
 };
 
 export const WebsiteBuilder = () => {
-  const [config, setConfig] = useState<WebsiteConfig>(defaultConfig);
+  const { 
+    state: config, 
+    setState: setConfig, 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo 
+  } = useHistoryState<WebsiteConfig>(defaultConfig);
+  
   const [activeTab, setActiveTab] = useState('templates');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const { toast } = useToast();
+
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      const projectData = {
+        config,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('website-builder-autosave', JSON.stringify(projectData));
+      setLastSaved(new Date());
+    }, 30000); // Auto-save every 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [config]);
 
   const updateConfig = (updates: Partial<WebsiteConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
@@ -93,10 +120,34 @@ export const WebsiteBuilder = () => {
 
   const loadProject = (projectConfig: WebsiteConfig) => {
     setConfig(projectConfig);
+    toast({
+      title: "Project Loaded!",
+      description: "Your project has been loaded successfully.",
+    });
   };
 
   const saveProject = () => {
-    // Project saved in ProjectManager component
+    setLastSaved(new Date());
+    toast({
+      title: "Project Saved!",
+      description: "Your changes have been saved.",
+    });
+  };
+
+  const handleUndo = () => {
+    undo();
+    toast({
+      title: "Undone",
+      description: "Last action has been undone.",
+    });
+  };
+
+  const handleRedo = () => {
+    redo();
+    toast({
+      title: "Redone",
+      description: "Action has been redone.",
+    });
   };
 
   return (
@@ -119,33 +170,67 @@ export const WebsiteBuilder = () => {
               </div>
             </div>
             
-            <ProjectManager 
-              currentConfig={config}
-              onLoadProject={loadProject}
-              onSaveProject={saveProject}
-            />
+            <div className="flex items-center justify-between">
+              <ProjectManager 
+                currentConfig={config}
+                onLoadProject={loadProject}
+                onSaveProject={saveProject}
+              />
+              
+              {/* History Controls */}
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUndo}
+                  disabled={!canUndo}
+                  title="Undo (Ctrl+Z)"
+                >
+                  <Undo className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRedo}
+                  disabled={!canRedo}
+                  title="Redo (Ctrl+Y)"
+                >
+                  <Redo className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {lastSaved && (
+              <p className="text-xs text-slate-500 mt-2">
+                Last saved: {lastSaved.toLocaleTimeString()}
+              </p>
+            )}
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-5 m-4 bg-slate-100 dark:bg-slate-700">
-              <TabsTrigger value="templates" className="flex flex-col items-center gap-1 p-3">
-                <Layout className="w-4 h-4" />
+            <TabsList className="grid w-full grid-cols-6 m-4 bg-slate-100 dark:bg-slate-700">
+              <TabsTrigger value="templates" className="flex flex-col items-center gap-1 p-2">
+                <Layout className="w-3 h-3" />
                 <span className="text-xs">Templates</span>
               </TabsTrigger>
-              <TabsTrigger value="customize" className="flex flex-col items-center gap-1 p-3">
-                <Palette className="w-4 h-4" />
+              <TabsTrigger value="customize" className="flex flex-col items-center gap-1 p-2">
+                <Palette className="w-3 h-3" />
                 <span className="text-xs">Style</span>
               </TabsTrigger>
-              <TabsTrigger value="content" className="flex flex-col items-center gap-1 p-3">
-                <FileText className="w-4 h-4" />
+              <TabsTrigger value="content" className="flex flex-col items-center gap-1 p-2">
+                <FileText className="w-3 h-3" />
                 <span className="text-xs">Content</span>
               </TabsTrigger>
-              <TabsTrigger value="advanced" className="flex flex-col items-center gap-1 p-3">
-                <Settings className="w-4 h-4" />
+              <TabsTrigger value="components" className="flex flex-col items-center gap-1 p-2">
+                <Layers className="w-3 h-3" />
+                <span className="text-xs">Components</span>
+              </TabsTrigger>
+              <TabsTrigger value="advanced" className="flex flex-col items-center gap-1 p-2">
+                <Settings className="w-3 h-3" />
                 <span className="text-xs">Advanced</span>
               </TabsTrigger>
-              <TabsTrigger value="export" className="flex flex-col items-center gap-1 p-3">
-                <Download className="w-4 h-4" />
+              <TabsTrigger value="export" className="flex flex-col items-center gap-1 p-2">
+                <Download className="w-3 h-3" />
                 <span className="text-xs">Export</span>
               </TabsTrigger>
             </TabsList>
@@ -159,10 +244,18 @@ export const WebsiteBuilder = () => {
               </TabsContent>
 
               <TabsContent value="customize" className="h-full mt-0">
-                <CustomizationPanel 
-                  config={config}
-                  onConfigChange={updateConfig}
-                />
+                <div className="space-y-4 p-4 h-full overflow-y-auto">
+                  <CustomizationPanel 
+                    config={config}
+                    onConfigChange={updateConfig}
+                  />
+                  <div className="border-t pt-4">
+                    <ColorPaletteGenerator
+                      currentColor={config.primaryColor}
+                      onColorChange={(color) => updateConfig({ primaryColor: color })}
+                    />
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="content" className="h-full mt-0">
@@ -171,6 +264,10 @@ export const WebsiteBuilder = () => {
                   onConfigChange={updateConfig}
                   onContentChange={updateContent}
                 />
+              </TabsContent>
+
+              <TabsContent value="components" className="h-full mt-0">
+                <ComponentLibrary />
               </TabsContent>
 
               <TabsContent value="advanced" className="h-full mt-0">
@@ -253,7 +350,7 @@ export const WebsiteBuilder = () => {
           </div>
 
           <div className="flex-1 overflow-hidden bg-slate-100 dark:bg-slate-900">
-            <LivePreview config={config} />
+            <ResponsivePreview config={config} />
           </div>
         </div>
       </div>
