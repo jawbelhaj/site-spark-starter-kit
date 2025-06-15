@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TemplateSelector } from './TemplateSelector';
 import { CustomizationPanel } from './CustomizationPanel';
@@ -8,6 +7,7 @@ import { ContentEditor } from './ContentEditor';
 import { ComponentLibrary } from './ComponentLibrary';
 import { ColorPaletteGenerator } from './ColorPaletteGenerator';
 import { AIContentSuggestions } from './AIContentSuggestions';
+import { AIPromptTemplates } from './AIPromptTemplates';
 import { LiveSEOAnalyzer } from './LiveSEOAnalyzer';
 import { SocialMediaIntegration } from './SocialMediaIntegration';
 import { WebsiteConfig } from './WebsiteBuilder';
@@ -49,6 +49,35 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
         break;
       case 'content':
         // Handle content suggestions
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleAIPromptResult = (result: any) => {
+    // Apply AI-generated results to the website config
+    switch (result.outputType) {
+      case 'layout':
+        // Apply layout changes
+        break;
+      case 'content':
+        onContentChange({
+          hero: {
+            ...config.content.hero,
+            title: result.result.headline,
+            subtitle: result.result.subheadline
+          }
+        });
+        break;
+      case 'meta':
+        onConfigChange({
+          title: result.result.title,
+          description: result.result.description
+        });
+        break;
+      case 'styles':
+        // Apply style changes
         break;
       default:
         break;
@@ -167,11 +196,17 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
           </TabsContent>
 
           <TabsContent value="ai" className="h-full mt-0">
-            <div className="p-4 space-y-4 h-full overflow-y-auto">
-              <AIContentSuggestions
-                currentContent={config.content}
-                onApplySuggestion={handleAISuggestion}
+            <div className="p-4 space-y-6 h-full overflow-y-auto">
+              <AIPromptTemplates
+                config={config}
+                onApplyResult={handleAIPromptResult}
               />
+              <div className="border-t pt-4">
+                <AIContentSuggestions
+                  currentContent={config.content}
+                  onApplySuggestion={handleAISuggestion}
+                />
+              </div>
             </div>
           </TabsContent>
 
