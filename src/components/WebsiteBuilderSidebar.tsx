@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TemplateSelector } from './TemplateSelector';
 import { CustomizationPanel } from './CustomizationPanel';
@@ -10,8 +11,11 @@ import { AIContentSuggestions } from './AIContentSuggestions';
 import { AIPromptTemplates } from './AIPromptTemplates';
 import { LiveSEOAnalyzer } from './LiveSEOAnalyzer';
 import { SocialMediaIntegration } from './SocialMediaIntegration';
+import { SEOOptimizer } from './SEOOptimizer';
+import { PWAServiceWorker } from './PWAServiceWorker';
+import { AccessibilityChecker } from './AccessibilityChecker';
 import { WebsiteConfig } from './WebsiteBuilder';
-import { Layout, Palette, FileText, Layers, Settings, Download, Sparkles, Search, Share } from 'lucide-react';
+import { Layout, Palette, FileText, Layers, Settings, Download, Sparkles, Search, Share, Eye, Smartphone } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface WebsiteBuilderSidebarProps {
@@ -88,6 +92,16 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
     onConfigChange({ socials });
   };
 
+  const handleSEOOptimize = (optimizations: any) => {
+    // Apply SEO optimizations
+    console.log('Applying SEO optimizations:', optimizations);
+  };
+
+  const handlePWAToggle = (enabled: boolean) => {
+    // Toggle PWA features
+    console.log('PWA features:', enabled ? 'enabled' : 'disabled');
+  };
+
   return (
     <div className="w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-r border-slate-200 dark:border-slate-700 flex flex-col shadow-xl">
       <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700">
@@ -129,7 +143,7 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
       </div>
 
       <Tabs value={activeTab} onValueChange={onActiveTabChange} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-8 m-4 bg-slate-100 dark:bg-slate-700">
+        <TabsList className="grid w-full grid-cols-9 m-4 bg-slate-100 dark:bg-slate-700">
           <TabsTrigger value="templates" className="flex flex-col items-center gap-1 p-2">
             <Layout className="w-3 h-3" />
             <span className="text-xs">Templates</span>
@@ -154,9 +168,13 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
             <Search className="w-3 h-3" />
             <span className="text-xs">SEO</span>
           </TabsTrigger>
-          <TabsTrigger value="social" className="flex flex-col items-center gap-1 p-2">
-            <Share className="w-3 h-3" />
-            <span className="text-xs">Social</span>
+          <TabsTrigger value="accessibility" className="flex flex-col items-center gap-1 p-2">
+            <Eye className="w-3 h-3" />
+            <span className="text-xs">A11y</span>
+          </TabsTrigger>
+          <TabsTrigger value="pwa" className="flex flex-col items-center gap-1 p-2">
+            <Smartphone className="w-3 h-3" />
+            <span className="text-xs">PWA</span>
           </TabsTrigger>
           <TabsTrigger value="export" className="flex flex-col items-center gap-1 p-2">
             <Download className="w-3 h-3" />
@@ -216,13 +234,25 @@ export const WebsiteBuilderSidebar: React.FC<WebsiteBuilderSidebarProps> = ({
 
           <TabsContent value="seo" className="h-full mt-0">
             <div className="p-4 space-y-4 h-full overflow-y-auto">
-              <LiveSEOAnalyzer config={config} />
+              <SEOOptimizer 
+                config={config}
+                onOptimize={handleSEOOptimize}
+              />
             </div>
           </TabsContent>
 
-          <TabsContent value="social" className="h-full mt-0">
+          <TabsContent value="accessibility" className="h-full mt-0">
             <div className="p-4 space-y-4 h-full overflow-y-auto">
-              <SocialMediaIntegration onUpdateSocials={handleSocialUpdate} />
+              <AccessibilityChecker config={config} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="pwa" className="h-full mt-0">
+            <div className="p-4 space-y-4 h-full overflow-y-auto">
+              <PWAServiceWorker 
+                isEnabled={config.template === 'pwa'}
+                onToggle={handlePWAToggle}
+              />
             </div>
           </TabsContent>
 
