@@ -4,7 +4,9 @@ import { TemplateSelector } from './TemplateSelector';
 import { CustomizationPanel } from './CustomizationPanel';
 import { LivePreview } from './LivePreview';
 import { ExportPanel } from './ExportPanel';
-import { Code, Layout, Settings, Download } from 'lucide-react';
+import { ProjectManager } from './ProjectManager';
+import { ContentEditor } from './ContentEditor';
+import { Code, Layout, Settings, Download, FileText, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -89,37 +91,62 @@ export const WebsiteBuilder = () => {
     }));
   };
 
+  const loadProject = (projectConfig: WebsiteConfig) => {
+    setConfig(projectConfig);
+  };
+
+  const saveProject = () => {
+    // Project saved in ProjectManager component
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="flex h-screen">
-        {/* Sidebar */}
-        <div className="w-80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-r border-slate-200 dark:border-slate-700 flex flex-col">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Website Builder
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Create beautiful websites in minutes
-            </p>
+        {/* Enhanced Sidebar */}
+        <div className="w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-r border-slate-200 dark:border-slate-700 flex flex-col shadow-xl">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Website Builder
+                </h1>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Create beautiful websites in minutes
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <Layout className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            
+            <ProjectManager 
+              currentConfig={config}
+              onLoadProject={loadProject}
+              onSaveProject={saveProject}
+            />
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 m-4">
-              <TabsTrigger value="templates" className="flex items-center gap-1">
+            <TabsList className="grid w-full grid-cols-5 m-4 bg-slate-100 dark:bg-slate-700">
+              <TabsTrigger value="templates" className="flex flex-col items-center gap-1 p-3">
                 <Layout className="w-4 h-4" />
-                <span className="hidden sm:inline">Templates</span>
+                <span className="text-xs">Templates</span>
               </TabsTrigger>
-              <TabsTrigger value="customize" className="flex items-center gap-1">
+              <TabsTrigger value="customize" className="flex flex-col items-center gap-1 p-3">
+                <Palette className="w-4 h-4" />
+                <span className="text-xs">Style</span>
+              </TabsTrigger>
+              <TabsTrigger value="content" className="flex flex-col items-center gap-1 p-3">
+                <FileText className="w-4 h-4" />
+                <span className="text-xs">Content</span>
+              </TabsTrigger>
+              <TabsTrigger value="advanced" className="flex flex-col items-center gap-1 p-3">
                 <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Customize</span>
+                <span className="text-xs">Advanced</span>
               </TabsTrigger>
-              <TabsTrigger value="content" className="flex items-center gap-1">
-                <Code className="w-4 h-4" />
-                <span className="hidden sm:inline">Content</span>
-              </TabsTrigger>
-              <TabsTrigger value="export" className="flex items-center gap-1">
+              <TabsTrigger value="export" className="flex flex-col items-center gap-1 p-3">
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="text-xs">Export</span>
               </TabsTrigger>
             </TabsList>
 
@@ -139,47 +166,45 @@ export const WebsiteBuilder = () => {
               </TabsContent>
 
               <TabsContent value="content" className="h-full mt-0">
+                <ContentEditor 
+                  config={config}
+                  onConfigChange={updateConfig}
+                  onContentChange={updateContent}
+                />
+              </TabsContent>
+
+              <TabsContent value="advanced" className="h-full mt-0">
                 <div className="p-4 space-y-4 h-full overflow-y-auto">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Site Title</label>
-                    <input
-                      type="text"
-                      value={config.title}
-                      onChange={(e) => updateConfig({ title: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                    />
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+                      Advanced Settings
+                    </h3>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
-                    <textarea
-                      value={config.description}
-                      onChange={(e) => updateConfig({ description: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-20 resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hero Title</label>
-                    <input
-                      type="text"
-                      value={config.content.hero.title}
-                      onChange={(e) => updateContent({ 
-                        hero: { ...config.content.hero, title: e.target.value }
-                      })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hero Subtitle</label>
-                    <textarea
-                      value={config.content.hero.subtitle}
-                      onChange={(e) => updateContent({ 
-                        hero: { ...config.content.hero, subtitle: e.target.value }
-                      })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-16 resize-none"
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Custom CSS</label>
+                      <textarea
+                        placeholder="/* Add your custom CSS here */"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-32 resize-none font-mono text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Meta Tags</label>
+                      <textarea
+                        placeholder="Additional meta tags for SEO"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-20 resize-none"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Analytics Code</label>
+                      <textarea
+                        placeholder="Google Analytics or other tracking code"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white h-20 resize-none"
+                      />
+                    </div>
                   </div>
                 </div>
               </TabsContent>
@@ -191,27 +216,43 @@ export const WebsiteBuilder = () => {
           </Tabs>
         </div>
 
-        {/* Main Preview Area */}
+        {/* Enhanced Main Preview Area */}
         <div className="flex-1 flex flex-col">
-          <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600 dark:text-slate-400">Preview:</span>
-              <span className="text-sm font-medium text-slate-900 dark:text-white capitalize">
-                {config.template} Template
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <span>Preview:</span>
+                <span className="font-medium text-slate-900 dark:text-white capitalize">
+                  {config.template} Template
+                </span>
+                <span className="text-slate-400">•</span>
+                <span className="capitalize">{config.theme} mode</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span>Live Preview</span>
+                </div>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => updateConfig({ theme: config.theme === 'light' ? 'dark' : 'light' })}
+                className="transition-all hover:scale-105"
               >
                 {config.theme === 'light' ? '🌙' : '☀️'}
               </Button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden bg-slate-100 dark:bg-slate-900">
             <LivePreview config={config} />
           </div>
         </div>
