@@ -10,7 +10,7 @@ import { useHistoryState } from '../hooks/useHistoryState';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WebsiteConfig {
-  template: 'blog' | 'portfolio' | 'store' | 'landing';
+  template: 'blog' | 'portfolio' | 'store' | 'landing' | 'pwa' | 'docs';
   title: string;
   description: string;
   theme: 'light' | 'dark';

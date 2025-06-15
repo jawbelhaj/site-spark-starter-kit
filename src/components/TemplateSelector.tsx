@@ -41,6 +41,22 @@ const templates = [
     image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d',
     features: ['Product Catalog', 'Shopping Cart', 'Checkout', 'Inventory'],
     category: 'E-commerce'
+  },
+  {
+    id: 'pwa' as const,
+    name: 'Offline PWA',
+    description: 'Installable app that works offline with service workers',
+    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
+    features: ['Offline Support', 'Installable', 'Push Notifications', 'Cache Management'],
+    category: 'Application'
+  },
+  {
+    id: 'docs' as const,
+    name: 'Docs Site',
+    description: 'Documentation site with search, TOC, and versioning',
+    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6',
+    features: ['Table of Contents', 'Search', 'Versioning', 'Navigation'],
+    category: 'Documentation'
   }
 ];
 

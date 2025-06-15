@@ -7,6 +7,8 @@ import { LandingTemplate } from './templates/LandingTemplate';
 import { PortfolioTemplate } from './templates/PortfolioTemplate';
 import { BlogTemplate } from './templates/BlogTemplate';
 import { StoreTemplate } from './templates/StoreTemplate';
+import { PWATemplate } from './templates/PWATemplate';
+import { DocsTemplate } from './templates/DocsTemplate';
 
 interface ResponsivePreviewProps {
   config: WebsiteConfig;
@@ -37,6 +39,10 @@ export const ResponsivePreview: React.FC<ResponsivePreviewProps> = ({ config }) 
         return <BlogTemplate {...templateProps} />;
       case 'store':
         return <StoreTemplate {...templateProps} />;
+      case 'pwa':
+        return <PWATemplate {...templateProps} />;
+      case 'docs':
+        return <DocsTemplate {...templateProps} />;
       default:
         return <LandingTemplate {...templateProps} />;
     }
